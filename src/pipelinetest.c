@@ -1,4 +1,3 @@
-#include <pipelinetest.h>
 
 int pipe_test(int *, char *const []);
 

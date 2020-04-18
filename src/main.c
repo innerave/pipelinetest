@@ -1,4 +1,14 @@
-#include "pipelinetest.h"
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <limits.h>
+#include <string.h>
+#include <sys/types.h>
+
+enum Mode {
+        HELP = 1, EXECUTE
+};
 
 int main(int argc, char *argv[]) {
         int opt;
@@ -25,13 +35,13 @@ int main(int argc, char *argv[]) {
                                 break;
                         case 'n':
                                 printf("Длинна ключа: %s\n", optarg);
-                                key_length = optarg;
+                                key_length = atoi(optarg);
                                 break;
                         case 'h':
                                 mode = HELP;
                                 break;
                         case ':':
-                                printf("Требуется имя архива\n");
+                                printf("Требуются дополнительные аргументы\n");
                                 break;
                         case '?':
                                 printf("Неизвестная команда: %c\n", optopt);
@@ -41,15 +51,11 @@ int main(int argc, char *argv[]) {
                 }
                 if (mode == HELP) {
                         printf("Использование:\n");
-                        printf("./arch -e {имя_архива} "
-                               "извлечение из архива\n");
-                        printf("./arch -c {имя_архива} {файл1} {файл2} {файл3}"
-                               "... создание архива\n");
                         return 0;
                 }
 
                 if (mode == EXECUTE) {
-                                                        printf("%s %s", source, key);
+                                                      //  printf("%s \n %s \n %d", source, key, key_length);
                 }
         }
         return 0;
