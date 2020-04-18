@@ -1,4 +1,4 @@
-#include "archiver.h"
+#include "pipelinetest.h"
 
 int main(int argc, char *argv[]) {
         int opt;
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
          * optopt – нераспознанная опция.
          * argv[optind] – и далее – собранные файлы
          */
-        while ((opt = getopt(argc, argv, ":e:c:h")) != -1) {
+        while ((opt = getopt(argc, argv, ":s:k:n:h")) != -1) {
                 switch (opt) {
                         case 's':
                                 printf("Источник: %s\n", optarg);
@@ -49,10 +49,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 if (mode == EXECUTE) {
-                        if (!source) {
-							printf("Не указан источник");
-							return -1;
-						}
+                                                        printf("%s %s", source, key);
                 }
         }
         return 0;
