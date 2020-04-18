@@ -71,13 +71,34 @@ int main(int argc, char *argv[]) {
 				printf("Нет нет длинны ключа");
 				return -1;
 			}
-			
+			return main_pipe(source, key, key_length);
         }
         return 0;
 }
 
 int main_pipe(char const *source, char const *key, int key_length)
 {
+	char * source_parsed[20];
+	char * key_parsed[20];
+	
+	int count = 0;
+	char *pch = strtok (source, " "); 
+	while (pch != NULL) //пока есть лексемы
+	{
+		source_parsed[count] = pch;
+		pch = strtok (NULL, " ");
+		count++;
+	}
+	
+	count = 0;
+	pch = strtok (key, " ");
+	while (pch != NULL) //пока есть лексемы
+	{
+		key_parsed[count] = pch;
+		pch = strtok (NULL, " ");
+		count++;
+	}
+	
     pid_t pid_1, pid_2;
     int pipe_1[2], pipe_2[2];
 
@@ -98,7 +119,7 @@ int main_pipe(char const *source, char const *key, int key_length)
     {
 	char *str[] = {(char *)argv[1], (char *)argv[2], NULL};
 
-	pipe_test(pipe_1, str);
+	pipe_test(source_parsed[0], source_parsed);
     }
 
     pid_2 = fork();
@@ -106,7 +127,7 @@ int main_pipe(char const *source, char const *key, int key_length)
     {
 	char *str[] = {(char *)argv[3], (char *)argv[4], NULL};
 
-	pipe_test(pipe_2, str);
+	pipe_test(key_parsed[0], key_parsed);
     }
 
     char buf_1[_POSIX_PIPE_BUF], buf_2[_POSIX_PIPE_BUF];
