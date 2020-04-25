@@ -54,7 +54,7 @@ int main_pipe(int argc, char const **argv)
 	if (buf_1_read != buf_2_read)
 	{
 	    printf("sizes unequal\n");
-	    return EXIT_FAILURE;
+	return EXIT_FAILURE;
 	}
 	for (int i = 0 ; i < (int) buf_1_read; i++)
 	{
