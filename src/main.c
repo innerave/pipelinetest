@@ -29,15 +29,15 @@ int main(int argc, char *argv[]) {
         while ((opt = getopt(argc, argv, ":s:k:n:h")) != -1) {
                 switch (opt) {
                         case 's':
-                                printf("Источник: %s\n", optarg);
+                                // printf("Источник: %s\n", optarg);
                                 source = optarg;
                                 break;
                         case 'k':
-                                printf("Ключ: %s\n", optarg);
+                                // printf("Ключ: %s\n", optarg);
                                 key = optarg;
                                 break;
                         case 'n':
-                                printf("Длинна ключа: %s\n", optarg);
+                                // printf("Длинна ключа: %s\n", optarg);
                                 key_length = atoi(optarg);
                                 break;
                         case 'h':
@@ -78,11 +78,16 @@ int main(int argc, char *argv[]) {
 
 int main_pipe(char const *source, char const *key, int key_length)
 {
+    char source_copy[_POSIX_ARG_MAX];
+    char key_copy[_POSIX_ARG_MAX];
 	char * source_parsed[20];
 	char * key_parsed[20];
-	
 	int count = 0;
-	char *pch = strtok (source, " "); 
+
+    strcpy(source_copy, source);
+    strcpy(key_copy, key);
+
+	char *pch = strtok (source_copy, " "); 
 	while (pch != NULL) //пока есть лексемы
 	{
 		source_parsed[count] = pch;
@@ -91,7 +96,7 @@ int main_pipe(char const *source, char const *key, int key_length)
 	}
 	
 	count = 0;
-	pch = strtok (key, " ");
+	pch = strtok (key_copy, " ");
 	while (pch != NULL) //пока есть лексемы
 	{
 		key_parsed[count] = pch;
@@ -104,30 +109,26 @@ int main_pipe(char const *source, char const *key, int key_length)
 
     if (pipe(pipe_1))
     {
-	perror("pipe");
-	return -2;
+	   perror("pipe");
+	   return -2;
     }
 
     if (pipe(pipe_2))
     {
-	perror("pipe");
-	return -2;
+	   perror("pipe");
+	   return -2;
     }
 
     pid_1 = fork();
     if (pid_1 == (pid_t) 0)
     {
-	char *str[] = {(char *)argv[1], (char *)argv[2], NULL};
-
-	pipe_test(source_parsed[0], source_parsed);
+	   pipe_test(pipe_1, source_parsed);
     }
 
     pid_2 = fork();
     if (pid_2 == (pid_t) 0)
     {
-	char *str[] = {(char *)argv[3], (char *)argv[4], NULL};
-
-	pipe_test(key_parsed[0], key_parsed);
+	   pipe_test(pipe_2, key_parsed);
     }
 
     char buf_1[_POSIX_PIPE_BUF], buf_2[_POSIX_PIPE_BUF];
@@ -135,19 +136,25 @@ int main_pipe(char const *source, char const *key, int key_length)
     close(pipe_1[1]);
     close(pipe_2[1]);
     ssize_t buf_1_read, buf_2_read;
+    count = 0;
+    while (count < key_length) {
+        buf_1_read = read(pipe_1[0], buf_1, _POSIX_PIPE_BUF);
+	    buf_2_read = read(pipe_2[0], buf_2, _POSIX_PIPE_BUF);
 
-    while (buf_1_read = read(pipe_1[0], buf_1, _POSIX_PIPE_BUF)) {
-	buf_2_read = read(pipe_2[0], buf_2, _POSIX_PIPE_BUF);
-
-	if (buf_1_read != buf_2_read)
-	{
-	    printf("sizes unequal\n");
-	    return EXIT_FAILURE;
-	}
-	for (int i = 0 ; i < (int) buf_1_read; i++)
-	{
-	    printf("%c", buf_1[i] ^ buf_2[i]);
-	}
+        if (!buf_1 || !buf_2) {
+            perror("read");
+            return EXIT_FAILURE;
+        }
+	    if (buf_1_read != buf_2_read)
+	    {
+            printf("sizes unequal\n");
+            return EXIT_FAILURE;
+	    }
+	    for (int i = 0 ; i < (int) buf_1_read; i++)
+	    {
+            printf("%c", buf_1[i] ^ buf_2[i]);
+	    }
+        count++;
     }
     return EXIT_SUCCESS;
 }
