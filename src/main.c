@@ -13,7 +13,7 @@ enum Mode {
 int pipe_test(int *, char *const []);
 int main_pipe(char const *, char const *);
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
 	int opt;
 	int mode = EXECUTE;
@@ -52,15 +52,15 @@ int main(int argc, char *argv[])
 		if (mode == HELP) {
 	    printf("Использование:\n");
 	    printf("pipetest -s <cmd for source> -k <cmd for key>\n");
-	    return 0;
+	return 0;
 	}
 
 	if (mode == EXECUTE) {
-	    if (!source) {
+	if (!source) {
 				printf("Нет источника");
 				return -1;
 			}
-	    if (!key) {
+	if (!key) {
 				printf("Нет ключа");
 				return -1;
 			}
@@ -137,12 +137,12 @@ int main_pipe(char const *source, char const *key)
 
 		if (!buf_1 || !buf_2) {
 		    perror("read");
-		    return EXIT_FAILURE;
+		return EXIT_FAILURE;
 		}
 		if (buf_1_read != buf_2_read)
 		{
 		    printf("sizes unequal\n");
-		    return EXIT_FAILURE;
+		return EXIT_FAILURE;
 		}
 		if (buf_1_read == 0) break;
 		for (int i = 0 ; i < (int) buf_1_read; i++)
