@@ -11,15 +11,14 @@ enum Mode {
 };
 
 int pipe_test(int *, char *const []);
-int main_pipe(char const *, char const *, int);
+int main_pipe(char const *, char const *);
 
 int main(int argc, char *argv[]) 
 {
 	int opt;
 	int mode = EXECUTE;
 	char *source = NULL;
-		char *key = NULL;
-		int key_length = 0;
+	char *key = NULL;
 	/*
 	 * optarg – указатель на текущий аргумент, если таковой имеется.
 	 * optind – индекс на следующий указатель argv, который будет обработан
@@ -27,7 +26,7 @@ int main(int argc, char *argv[])
 	 * optopt – нераспознанная опция.
 	 * argv[optind] – и далее – собранные файлы
 	 */
-	while ((opt = getopt(argc, argv, ":s:k:n:h")) != -1) {
+	while ((opt = getopt(argc, argv, ":s:k:h")) != -1) {
 		switch (opt) {
 			case 's':
 				// printf("Источник: %s\n", optarg);
@@ -36,10 +35,6 @@ int main(int argc, char *argv[])
 			case 'k':
 				// printf("Ключ: %s\n", optarg);
 				key = optarg;
-				break;
-			case 'n':
-				// printf("Длинна ключа: %s\n", optarg);
-				key_length = atoi(optarg);
 				break;
 			case 'h':
 				mode = HELP;
@@ -56,6 +51,7 @@ int main(int argc, char *argv[])
 	}
 		if (mode == HELP) {
 	    printf("Использование:\n");
+	    printf("pipetest -s <cmd for source> -k <cmd for key>\n");
 	    return 0;
 	}
 
@@ -68,16 +64,12 @@ int main(int argc, char *argv[])
 				printf("Нет ключа");
 				return -1;
 			}
-	    if (!key_length) {
-				printf("Нет нет длинны ключа");
-				return -1;
-			}
-			return main_pipe(source, key, key_length);
+			return main_pipe(source, key);
 	}
 	return 0;
 }
 
-int main_pipe(char const *source, char const *key, int key_length)
+int main_pipe(char const *source, char const *key)
 {
     char source_copy[_POSIX_ARG_MAX];
     char key_copy[_POSIX_ARG_MAX];
@@ -139,25 +131,24 @@ int main_pipe(char const *source, char const *key, int key_length)
     close(pipe_2[1]);
     ssize_t buf_1_read, buf_2_read;
 
-    count = 0;
-    while (count < key_length) {
-	buf_1_read = read(pipe_1[0], buf_1, _POSIX_PIPE_BUF);
-	    buf_2_read = read(pipe_2[0], buf_2, _POSIX_PIPE_BUF);
+    while (1) {
+		buf_1_read = read(pipe_1[0], buf_1, _POSIX_PIPE_BUF);
+		buf_2_read = read(pipe_2[0], buf_2, _POSIX_PIPE_BUF);
 
-	if (!buf_1 || !buf_2) {
-	    perror("read");
-	    return EXIT_FAILURE;
-	}
-	if (buf_1_read != buf_2_read)
-	{
-	    printf("sizes unequal\n");
-	    return EXIT_FAILURE;
-	}
-	for (int i = 0 ; i < (int) buf_1_read; i++)
-	{
-	    printf("%c", buf_1[i] ^ buf_2[i]);
-	}
-	count++;
+		if (!buf_1 || !buf_2) {
+		    perror("read");
+		    return EXIT_FAILURE;
+		}
+		if (buf_1_read != buf_2_read)
+		{
+		    printf("sizes unequal\n");
+		    return EXIT_FAILURE;
+		}
+		if (buf_1_read == 0) break;
+		for (int i = 0 ; i < (int) buf_1_read; i++)
+		{
+		    printf("%c", buf_1[i] ^ buf_2[i]);
+		}
     }
     return EXIT_SUCCESS;
 }
